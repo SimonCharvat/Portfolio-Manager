@@ -16,11 +16,13 @@ exchange_codes = {
 # csv file - stocks
 df_stocks = pd.DataFrame(data={
     "id": [1, 2],
-    "ticker":           ["TUI1", "VWCE"],
-    "ticker_full":      ["TUI1.DE", "VWCE.DE"],
+    "ticker":           ["TUI1.DE", "VWCE.DE"],
     "exchange_name":    ["Xetra", "Xetra"],
-    "exchange_code":    ["DE", "DE"],
-    "name":             ["TUI Group", "Vanguard FTSE All-World"],
+    "exchange_tag":  ["?", "?"],
+    "name_short":       ["TUI Group", "Vanguard FTSE All-World"],
+    "name_long":        ["TUI Group", "Vanguard FTSE All-World"],
+    "currency":         ["EUR", "EUR"],
+    "instrument_type":  ["EQUITY", "EQUITY"],
     "description":      ["", ""]
 })
 
@@ -33,24 +35,47 @@ print(df_stocks)
 
 # Set the start and end date
 start_date = '2020-01-01'
-end_date = '2024-10-15'
 
 
 
-def add_ticker(ticker_full: str):
-    new_ticker = yf.Ticker(ticker_full)
+def add_ticker(df_stocks: pd.DataFrame, ticker: str):
+    new_ticker = yf.Ticker(ticker)
     
-    name = new_ticker.history_metadata["shortName"]
-    currency = new_ticker.history_metadata["currency"]
-    exchange_name = new_ticker.history_metadata["fullExchangeName"]
-    instrument_type = new_ticker.history_metadata["instrumentType"] # ETF / EQUITY
+    try:
+        name_short = new_ticker.history_metadata["shortName"]
+        name_long = new_ticker.history_metadata["longName"]
+        currency = new_ticker.history_metadata["currency"]
+        exchange_tag = new_ticker.history_metadata["exchangeName"]
+        exchange_name = new_ticker.history_metadata["fullExchangeName"]
+        instrument_type = new_ticker.history_metadata["instrumentType"] # ETF / EQUITY
+    except Exception as e:
+        print(f"Ticker {ticker} not found at Yahoo Finance")
+        print(f"Error code:\n {e}")
+        return
     
-    print(name, currency, exchange_name)
 
-add_ticker("AFR0.F") # air france
+    df_stocks.loc[len(df_stocks)] = [
+        max(df_stocks["id"]) + 1,
+        ticker,
+        exchange_name,
+        exchange_tag,
+        name_short,
+        name_long,
+        currency,
+        instrument_type,
+        ""
+    ]
+
+    print(f"Ticker {ticker} added")
+
+add_ticker(df_stocks, "AFR0.F") # air france
+
+add_ticker(df_stocks, "FAKE.F")
+
+print(df_stocks)
 
 
-tickers = df_stocks["ticker_full"].to_list()
+tickers = df_stocks["ticker"].to_list()
 
 # Get the data
 data: pd.DataFrame = yf.download(tickers, start_date, interval="1wk", group_by="column")
