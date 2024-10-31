@@ -59,7 +59,6 @@ def parse_query_response(json_text: str):
     return df_stocks
 
 
-# use query functions
 
 # get raw data from yahoo finance
 query_response_raw = query_yahoo_finance_for_ticker("Vanguard world")
