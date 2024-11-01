@@ -13,8 +13,7 @@ class BasePage(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
-        self.frame = ctk.CTkScrollableFrame(self, bg_color="blue")
-        #self.frame.pack(fill="both", expand=True)
+        self.frame = ctk.CTkScrollableFrame(self)
         self.load_page()
 
     def hide(self):
