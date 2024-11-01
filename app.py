@@ -2,6 +2,8 @@
 
 import customtkinter as ctk
 
+import utils
+
 # Set the appearance mode and color theme
 ctk.set_appearance_mode("dark")  # Options: "dark", "light", "system"
 ctk.set_default_color_theme("blue")  # Available themes: "blue", "green", "dark-blue"
@@ -11,17 +13,23 @@ class BasePage(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
+        self.frame = ctk.CTkScrollableFrame(self, bg_color="blue")
+        #self.frame.pack(fill="both", expand=True)
+        self.load_page()
 
-        self.frame = ctk.CTkScrollableFrame(self)
-        self.frame.pack(fill="both", expand=True)
-
+    def hide(self):
+        self.frame.pack_forget()
+    
     def show(self):
+        self.frame.pack(fill="both", expand=True)
         self.lift()
 
 # Overview Page
 class OverviewPage(BasePage):
     def __init__(self, parent):
         super().__init__(parent)
+
+    def load_page(self):
 
         label = ctk.CTkLabel(self.frame, text="Overview Page", font=("Arial", 16))
         label.pack(pady=20)
@@ -34,6 +42,8 @@ class OverviewPage(BasePage):
 class PortfolioPage(BasePage):
     def __init__(self, parent):
         super().__init__(parent)
+
+    def load_page(self):
 
         label = ctk.CTkLabel(self.frame, text="Portfolio Page", font=("Arial", 16))
         label.pack(pady=20)
@@ -51,6 +61,7 @@ class TransactionsPage(BasePage):
     def __init__(self, parent):
         super().__init__(parent)
 
+    def load_page(self):
         label = ctk.CTkLabel(self.frame, text="Transactions Page", font=("Arial", 16))
         label.pack(pady=20)
         
@@ -67,22 +78,20 @@ class TickerManagerPage(BasePage):
     def __init__(self, parent):
         super().__init__(parent)
 
+    def load_page(self):
         label = ctk.CTkLabel(self.frame, text="Ticker Manager Page", font=("Arial", 16))
         label.pack(pady=20)
         
         ticker_label = ctk.CTkLabel(self.frame, text="Manage Tickers", font=("Arial", 12))
         ticker_label.pack(pady=10)
         
-        # Example of adding new ticker functionality
+        # Example of input field for adding new ticker functionality 
         ticker_entry = ctk.CTkEntry(self.frame, placeholder_text="Enter Ticker")
         ticker_entry.pack(pady=5)
         
         add_button = ctk.CTkButton(self.frame, text="Add Ticker", command=lambda: print(f"Added ticker: {ticker_entry.get()}"))
         add_button.pack()
 
-        # Adding more content for scrolling
-        for i in range(10):  # More example tickers
-            ctk.CTkLabel(self.frame, text=f"Ticker Item {i+1}").pack(pady=5)
 
 # Main Application Class
 class App(ctk.CTk):
@@ -91,15 +100,15 @@ class App(ctk.CTk):
         self.title("Finance Management App")
         self.geometry("500x400")
         
-        # Create a navigation frame for the sidebar menu
+        # create a navigation frame for the sidebar menu
         nav_frame = ctk.CTkFrame(self, width=120, corner_radius=0)
         nav_frame.pack(side="left", fill="y")
         
-        # Container frame to hold all pages
+        # container frame to hold all pages
         content_frame = ctk.CTkFrame(self)
         content_frame.pack(side="right", fill="both", expand=True)
         
-        # Initialize each page and store it in the pages dictionary
+        # initialize each page and store it in the pages dictionary
         self.pages = {
             "Overview": OverviewPage(content_frame),
             "Portfolio": PortfolioPage(content_frame),
@@ -107,18 +116,39 @@ class App(ctk.CTk):
             "Ticker Manager": TickerManagerPage(content_frame),
         }
         
+        # place all pages in the app (only the one on top is always visible)
         for page in self.pages.values():
             page.place(relwidth=1, relheight=1)
-        self.pages["Overview"].show()  # Show Overview page initially
-
-        # Add sidebar buttons for navigation
-        for page_name in self.pages:
-            btn = ctk.CTkButton(nav_frame, text=page_name, command=lambda name=page_name: self.show_page(name))
-            btn.pack(pady=10, padx=10, fill="x")
         
-    def show_page(self, page_name):
-        page = self.pages[page_name]
+
+        # add sidebar buttons for navigation
+        self.menu_buttons = {}
+        for page_name in self.pages:
+            btn = ctk.CTkButton(nav_frame, text=page_name, command=lambda name=page_name: self.show_new_page(name))
+            btn.pack(pady=10, padx=10, fill="x")
+            self.menu_buttons[page_name] = btn
+        
+
+        # select initial page
+        self.current_page_name = "Overview"
+        self.pages[self.current_page_name].show()
+        self.show_new_page(self.current_page_name)
+
+
+    def show_new_page(self, new_page_name):
+        
+        print(f"Showing page {new_page_name}, previous page {self.current_page_name}")
+        
+        self.pages[self.current_page_name].hide()
+
+        page = self.pages[new_page_name]
         page.show()
+        
+        # change disabled button so it is disabled for currently selected page
+        self.menu_buttons[self.current_page_name].configure(state="normal") # enable old page button
+        self.menu_buttons[new_page_name].configure(state="disabled") # disable new page button
+        self.current_page_name = new_page_name # set new page as current page
+
 
 # Run the app
 if __name__ == "__main__":
