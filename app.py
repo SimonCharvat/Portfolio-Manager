@@ -1,12 +1,21 @@
 
 
 import customtkinter as ctk
+from tkinter import ttk
+import tkinter as tk
+import pandastable as pt
 
 import utils
+import test
+
 
 # Set the appearance mode and color theme
 ctk.set_appearance_mode("dark")  # Options: "dark", "light", "system"
 ctk.set_default_color_theme("blue")  # Available themes: "blue", "green", "dark-blue"
+
+
+
+
 
 # Base Page class for all other pages to inherit from
 class BasePage(ctk.CTkFrame):
@@ -81,6 +90,23 @@ class TickerManagerPage(BasePage):
         label = ctk.CTkLabel(self.frame, text="Ticker Manager Page", font=("Arial", 16))
         label.pack(pady=20)
         
+        data = utils.load_stock_list()
+        #ticker_table = ttk.Treeview(self.frame, columns=data.columns)
+        #ticker_table.pack()
+        
+        
+        #for i, row in data.iterrows():
+        #    ticker_table.insert("", tk.END, values=list(row))
+        
+
+        utils.Table(self.frame, data, orientation="both")
+        
+        #table_frame = ctk.CTkFrame(self.frame)
+        #table_frame.pack()
+
+        #pandas_table = pt.Table(table_frame, dataframe=data)
+        #pandas_table.show()
+
         ticker_label = ctk.CTkLabel(self.frame, text="Manage Tickers", font=("Arial", 12))
         ticker_label.pack(pady=10)
         
