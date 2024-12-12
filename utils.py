@@ -11,10 +11,17 @@ except ImportError:
     from typing_extensions import Literal
 
 import os
+from datetime import datetime, timedelta
+
+
+def get_yesterdays_date() -> str:
+    yesterday = datetime.now() - timedelta(days=1)
+    return yesterday.strftime("%Y-%m-%d")
 
 
 
 stock_list_location = "data_stocks.csv"
+
 
 def save_stock_list(data_frame: pd.DataFrame) -> None:
     try:
